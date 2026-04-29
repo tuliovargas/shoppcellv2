@@ -6,10 +6,11 @@ services:
     container_name: app
     entrypoint: ./docker/app/entrypoint.sh
     restart: always
+    environment:
+      - TZ=${TZ:-UTC}
     volumes:
       - .:/var/www
       - ./docker/app/dev.ini:/usr/local/etc/php/conf.d/custom.ini
-      - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     networks:
       - app-network
@@ -37,10 +38,10 @@ services:
     ports:
       - "8000:80"
     environment:
-      WAIT: -wait tcp://app:9000
+      WAIT: "-wait tcp://app:9000"
+      TZ: ${TZ:-UTC}
     volumes:
       - .:/var/www
-      - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     networks:
       - app-network
@@ -59,9 +60,9 @@ services:
       - ./docker/dumps:/tmp
       - ./docker/dbdata:/var/lib/mysql
       - ./docker/mysql:/docker-entrypoint-initdb.d
-      - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     environment:
+      - TZ=${TZ:-UTC}
       - MYSQL_DATABASE=env_db
       - MYSQL_ROOT_PASSWORD=root
     networks:
