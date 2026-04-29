@@ -18,9 +18,24 @@ elif command -v openssl >/dev/null 2>&1; then
   SSL_CHAIN=/etc/nginx/ssl/ephemeral/fullchain.pem
   SSL_KEY=/etc/nginx/ssl/ephemeral/privkey.pem
   if [ ! -f "$SSL_CHAIN" ] || [ ! -f "$SSL_KEY" ]; then
+    # SAN com o hostname do domínio (browsers/aviso menor); PEM reais LetsEncrypt ou Origin CA são preferíveis em produção.
+    cat >/tmp/ephemeral.cnf << 'EOFCONF'
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions = v3_req
+prompt = no
+[req_distinguished_name]
+CN = app.lojashoppcell.com.br
+[v3_req]
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = app.lojashoppcell.com.br
+DNS.2 = localhost
+EOFCONF
     openssl req -x509 -nodes -days 397 -newkey rsa:2048 \
       -keyout "$SSL_KEY" -out "$SSL_CHAIN" \
-      -subj "/CN=app.lojashoppcell.com.br"
+      -config /tmp/ephemeral.cnf -extensions v3_req
+    rm -f /tmp/ephemeral.cnf
   fi
 else
   echo "warning: openssl indisponível e sem PEMs — só HTTP 80." >&2
