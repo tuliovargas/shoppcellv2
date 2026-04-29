@@ -62,6 +62,11 @@ return [
     'dynamic_url' => (bool) env('APP_DYNAMIC_URL', false),
 
     /*
+    | Com true, redireciona pedidos HTTP para HTTPS (depois de TLS ativo e APP_URL=https://...).
+    */
+    'force_https' => (bool) env('APP_FORCE_HTTPS', false),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------

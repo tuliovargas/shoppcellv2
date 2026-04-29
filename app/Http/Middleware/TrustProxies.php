@@ -8,11 +8,11 @@ use Illuminate\Http\Request;
 class TrustProxies extends Middleware
 {
     /**
-     * The trusted proxies for this application.
+     * Procuração imediata = contentor nginx (TLS termina no nginx; PHP vê HTTP + X-Forwarded-Proto).
      *
      * @var array|string|null
      */
-    protected $proxies;
+    protected $proxies = '*';
 
     /**
      * The headers that should be used to detect proxies.

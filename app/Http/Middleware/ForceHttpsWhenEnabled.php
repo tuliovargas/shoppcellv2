@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+
+/**
+ * Redireciona HTTP → HTTPS quando APP_FORCE_HTTPS=true (após certificado e APP_URL com https://).
+ */
+class ForceHttpsWhenEnabled
+{
+    public function handle(Request $request, Closure $next)
+    {
+        if (config('app.force_https') && ! $request->secure()) {
+            return redirect()->secure($request->getRequestUri());
+        }
+
+        return $next($request);
+    }
+}

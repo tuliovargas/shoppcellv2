@@ -7,6 +7,7 @@ use App\Observers\ProductObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+
+        if (config('app.force_https')) {
+            URL::forceScheme('https');
+        }
+
         Relation::morphMap([
             'client' => 'App\Models\Client',
             'supplier' => 'App\Models\Supplier',
