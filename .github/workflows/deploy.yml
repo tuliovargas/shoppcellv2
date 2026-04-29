@@ -33,6 +33,8 @@ name: Deploy (rsync → VPS)
 #   SKIP_DOCKER_RESTART = true para não subir/atualizar stacks com docker compose na VPS.
 #   DEPLOY_COMPOSE_BUILD = true para correr também --build após código copiado (Dockerfiles/context).
 #                             Por omissão é só docker compose up -d — imagens ficam iguais; código PHP atualiza pelo volume montado (.:/var/www).
+#   Let's Encrypt: na VPS, após deploy com nginx.conf atual, executar scripts/letsencrypt-issue.sh (LE_EMAIL=…).
+#   Estado ACME em docker/certbot/conf/ excluído do rsync — não apaga certificados no servidor.
 #   HTTPS (produção): PEMs em docker/nginx/ssl/ (fullchain.pem + privkey.pem) — opcional: sem PEMs o nginx gera
 #   certificado ephemero autoassinado para ouvir 443 (corrige Cloudflare err. 521 com SSL "Full").
 #   Modo "Full (strict)" na origem: coloca PEMs reais (LetsEncrypt / Origin CA Cloudflare).

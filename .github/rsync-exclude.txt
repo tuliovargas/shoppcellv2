@@ -21,6 +21,9 @@
 /docker/nginx/ssl/fullchain.pem
 /docker/nginx/ssl/privkey.pem
 
+# Estado Let's Encrypt / ACME (só no servidor; não sobrescrever com deploy vazio)
+/docker/certbot/conf/
+
 # --- Laravel runtime (servidor gere localmente; não pisar uploads/sessões) ---
 /storage/logs/
 /storage/framework/

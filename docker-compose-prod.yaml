@@ -36,6 +36,13 @@ services:
     depends_on:
       - app
 
+  # Uso pontual: docker compose run --rm certbot certonly ... (ver scripts/letsencrypt-issue.sh)
+  certbot:
+    image: certbot/certbot:v2.11.0
+    volumes:
+      - ./docker/certbot/conf:/etc/letsencrypt
+      - .:/var/www
+
   db:
     build: docker/mariadb
     container_name: db
