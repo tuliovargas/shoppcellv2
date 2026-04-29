@@ -20,7 +20,7 @@ name: Deploy (rsync → VPS)
 # Opcional:
 #   — (adicione outros segredos se usares método em que estas variáveis apontariam só para SCP/rsync doutro tipo)
 #
-# Variables:
+# Variables ou Secrets (mesmos nomes — o workflow usa primeiro Variables, senão Secrets):
 #   DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_APP_PATH
 # Opcional:
 #   DEPLOY_SSH_PORT (default 22)
@@ -50,24 +50,25 @@ jobs:
   rsync-deploy:
     runs-on: ubuntu-latest
 
+    # Host/utilizador/porta/path: Variables OU Secrets (Secrets não aparecem em vars.*).
     env:
-      DEPLOY_HOST: ${{ vars.DEPLOY_SSH_HOST }}
-      DEPLOY_USER: ${{ vars.DEPLOY_SSH_USER }}
-      DEPLOY_DEST: ${{ vars.DEPLOY_APP_PATH }}
-      DEPLOY_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
-      DEPLOY_RSYNC_DELETE: ${{ vars.DEPLOY_RSYNC_DELETE }}
+      DEPLOY_HOST: ${{ vars.DEPLOY_SSH_HOST != '' && vars.DEPLOY_SSH_HOST || secrets.DEPLOY_SSH_HOST }}
+      DEPLOY_USER: ${{ vars.DEPLOY_SSH_USER != '' && vars.DEPLOY_SSH_USER || secrets.DEPLOY_SSH_USER }}
+      DEPLOY_DEST: ${{ vars.DEPLOY_APP_PATH != '' && vars.DEPLOY_APP_PATH || secrets.DEPLOY_APP_PATH }}
+      DEPLOY_PORT: ${{ vars.DEPLOY_SSH_PORT != '' && vars.DEPLOY_SSH_PORT || secrets.DEPLOY_SSH_PORT != '' && secrets.DEPLOY_SSH_PORT || '22' }}
+      DEPLOY_RSYNC_DELETE: ${{ vars.DEPLOY_RSYNC_DELETE != '' && vars.DEPLOY_RSYNC_DELETE || secrets.DEPLOY_RSYNC_DELETE }}
 
     steps:
       - uses: actions/checkout@v4
 
-      # Falha com mensagem clara se faltarem variables no repositório (Settings → Variables).
-      - name: Verificar variables de deploy
+      # Falha clara se faltar host utilizador ou path em Variables OU Secrets (Settings → Secrets and variables → Actions).
+      - name: Verificar config de deploy
         run: |
           set -euo pipefail
           err=0
-          if [ -z "${{ vars.DEPLOY_SSH_HOST }}" ]; then echo "::error::Cria a Repository variable DEPLOY_SSH_HOST (ex.: IP ou hostname da VPS)."; err=1; fi
-          if [ -z "${{ vars.DEPLOY_SSH_USER }}" ]; then echo "::error::Cria a Repository variable DEPLOY_SSH_USER (ex.: opc)."; err=1; fi
-          if [ -z "${{ vars.DEPLOY_APP_PATH }}" ]; then echo "::error::Cria a Repository variable DEPLOY_APP_PATH (ex.: /home/opc/apps/shoppcell)."; err=1; fi
+          if [ -z "${DEPLOY_HOST:-}" ]; then echo "::error::Define DEPLOY_SSH_HOST como Repository variable ou Secret."; err=1; fi
+          if [ -z "${DEPLOY_USER:-}" ]; then echo "::error::Define DEPLOY_SSH_USER como Repository variable ou Secret."; err=1; fi
+          if [ -z "${DEPLOY_DEST:-}" ]; then echo "::error::Define DEPLOY_APP_PATH como Repository variable ou Secret."; err=1; fi
           exit $err
 
       # Necessário se usares SSH (rsync -e ssh) e comando remoto com docker compose.
@@ -88,7 +89,7 @@ jobs:
       - name: rsync
         run: |
           set -euo pipefail
-          test -n "${DEPLOY_DEST}" || { echo "::error::Defina DEPLOY_APP_PATH nas variables."; exit 1; }
+          test -n "${DEPLOY_DEST}" || { echo "::error::Defina DEPLOY_APP_PATH como variable ou Secret."; exit 1; }
           EXTRA_DELETE=""
           if [ "${DEPLOY_RSYNC_DELETE}" = "true" ]; then
             EXTRA_DELETE="--delete"
@@ -106,7 +107,7 @@ jobs:
         if: ${{ vars.SKIP_DOCKER_RESTART != 'true' }}
         env:
           COMPOSE: ${{ vars.DEPLOY_COMPOSE_FILE != '' && vars.DEPLOY_COMPOSE_FILE || 'docker-compose.yaml' }}
-          REMOTE_HOME: ${{ vars.DEPLOY_APP_PATH }}
+          REMOTE_HOME: ${{ env.DEPLOY_DEST }}
         run: |
           set -euo pipefail
           ssh -p "${DEPLOY_PORT}" -o StrictHostKeyChecking=yes \
@@ -119,7 +120,7 @@ jobs:
         if: ${{ vars.SKIP_ARTISAN_AFTER_DEPLOY != 'true' }}
         env:
           COMPOSE: ${{ vars.DEPLOY_COMPOSE_FILE != '' && vars.DEPLOY_COMPOSE_FILE || 'docker-compose.yaml' }}
-          REMOTE_HOME: ${{ vars.DEPLOY_APP_PATH }}
+          REMOTE_HOME: ${{ env.DEPLOY_DEST }}
           SERVICE: ${{ vars.DEPLOY_DOCKER_SERVICE != '' && vars.DEPLOY_DOCKER_SERVICE || 'app' }}
         run: |
           set -euo pipefail
