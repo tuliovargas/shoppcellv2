@@ -29,11 +29,14 @@ name: Deploy (rsync → VPS)
 #   DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_APP_PATH
 # Opcional:
 #   DEPLOY_SSH_PORT (default 22)
-#   DEPLOY_COMPOSE_FILE (default docker-compose.yaml em script remoto)
+#   DEPLOY_COMPOSE_FILE (default docker-compose-prod.yaml na VPS — 80 + 443; override se precisares de outro ficheiro)
 #   SKIP_DOCKER_RESTART = true para não subir/atualizar stacks com docker compose na VPS.
 #   DEPLOY_COMPOSE_BUILD = true para correr também --build após código copiado (Dockerfiles/context).
 #                             Por omissão é só docker compose up -d — imagens ficam iguais; código PHP atualiza pelo volume montado (.:/var/www).
-#   HTTPS (produção): coloca docker/nginx/ssl/fullchain.pem + privkey.pem na VPS — o rsync não os substitui; rebuild nginx se mudares certs.
+#   HTTPS (produção): PEMs em docker/nginx/ssl/ (fullchain.pem + privkey.pem) — opcional: sem PEMs o nginx gera
+#   certificado ephemero autoassinado para ouvir 443 (corrige Cloudflare err. 521 com SSL "Full").
+#   Modo "Full (strict)" na origem: coloca PEMs reais (LetsEncrypt / Origin CA Cloudflare).
+#   Oracle: abre TCP 80 e 443 à Internet (Security Lists) para a Cloudflare/alcançar a origem.
 #   Preview só por IP antes do DNS: na VPS APP_DYNAMIC_URL=true no .env; acede http://IP (porta 80) ou http://IP:8000 conforme compose.
 #   DEPLOY_RSYNC_DELETE = true para ativar --delete no rsync (por omissão NÃO há --delete,
 #                             mais seguro para ficheiros que existem só no servidor.)
@@ -139,7 +142,7 @@ jobs:
       - name: docker compose na VPS (SSH)
         if: ${{ vars.SKIP_DOCKER_RESTART != 'true' }}
         env:
-          COMPOSE: ${{ vars.DEPLOY_COMPOSE_FILE != '' && vars.DEPLOY_COMPOSE_FILE || 'docker-compose.yaml' }}
+          COMPOSE: ${{ vars.DEPLOY_COMPOSE_FILE != '' && vars.DEPLOY_COMPOSE_FILE || 'docker-compose-prod.yaml' }}
           REMOTE_HOME: ${{ env.DEPLOY_DEST }}
         run: |
           set -euo pipefail
@@ -164,7 +167,7 @@ jobs:
       - name: Laravel na VPS — migrations + limpar caches
         if: ${{ vars.SKIP_ARTISAN_AFTER_DEPLOY != 'true' }}
         env:
-          COMPOSE: ${{ vars.DEPLOY_COMPOSE_FILE != '' && vars.DEPLOY_COMPOSE_FILE || 'docker-compose.yaml' }}
+          COMPOSE: ${{ vars.DEPLOY_COMPOSE_FILE != '' && vars.DEPLOY_COMPOSE_FILE || 'docker-compose-prod.yaml' }}
           REMOTE_HOME: ${{ env.DEPLOY_DEST }}
           SERVICE: ${{ vars.DEPLOY_DOCKER_SERVICE != '' && vars.DEPLOY_DOCKER_SERVICE || 'app' }}
         run: |

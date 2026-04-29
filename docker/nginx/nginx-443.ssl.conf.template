@@ -1,8 +1,10 @@
+# Preenchido em runtime (sed): @@FULLCHAIN@@ / @@PRIVKEY@@
+# LetsEncrypt / PEMs montados em docker/nginx/ssl OU cert ephemero (Full SSL até ter PEM real).
 server {
     listen 443 ssl http2;
     server_name app.lojashoppcell.com.br localhost;
-    ssl_certificate     /etc/nginx/ssl/custom/fullchain.pem;
-    ssl_certificate_key /etc/nginx/ssl/custom/privkey.pem;
+    ssl_certificate     @@FULLCHAIN@@;
+    ssl_certificate_key @@PRIVKEY@@;
     ssl_session_timeout 1d;
     ssl_session_cache shared:SSL:10m;
 
