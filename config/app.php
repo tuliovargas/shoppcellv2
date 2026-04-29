@@ -57,6 +57,11 @@ return [
     'asset_url' => env('ASSET_URL', null),
 
     /*
+    | Com true, cada pedido usa o Host esquema/porta atual (preview por IP; desativar com domínio fixo).
+    */
+    'dynamic_url' => (bool) env('APP_DYNAMIC_URL', false),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------

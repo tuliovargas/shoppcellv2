@@ -35,8 +35,10 @@ services:
     entrypoint: ["/bin/sh", "./docker/nginx/entrypoint.sh"]
     restart: always
     tty: true
+    # 8000 desenvolvimento; 80 = preview público por IP na Oracle (regra TCP 80 aberta — usa http://IP sem :8000)
     ports:
       - "8000:80"
+      - "80:80"
     environment:
       TZ: ${TZ:-UTC}
     volumes:
