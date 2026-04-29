@@ -15,8 +15,13 @@ name: Deploy (rsync → VPS)
 # ser outro playbook.
 #
 # Secrets:
-#   DEPLOY_SSH_PRIVATE_KEY  (opcional apenas se removeres os passos que usam SSH;
-#                             na prática o rsync habitual precisa.)
+#   DEPLOY_SSH_PRIVATE_KEY  — chave privada OpenSSH (RECOMENDADO: sem passphrase;
+#                             PEM completa com -----BEGIN …----- e -----END …----- ).
+# Troubleshooting "Permission denied (publickey)":
+#   No servidor, ~/.ssh/authorized_keys do UTILIZADOR em DEPLOY_SSH_USER deve conter a
+#   chave PÚBLICA que corresponde a este secret. Testa na tua máquina:
+#   ssh -p PORTA -i caminho/chave opc@HOST
+# Se falhar igual, o problema é na VPS authorized_keys/sshd antes do GitHub.
 # Opcional:
 #   — (adicione outros segredos se usares método em que estas variáveis apontariam só para SCP/rsync doutro tipo)
 #
@@ -72,6 +77,7 @@ jobs:
           exit $err
 
       # Necessário se usares SSH (rsync -e ssh) e comando remoto com docker compose.
+      # Grava ~/.ssh/id_rsa (chmod 600). rsync e ssh passam sempre -i e IdentitiesOnly=yes.
       - name: Chave SSH (transporte rsync / comando remoto)
         uses: shimataro/ssh-key-action@v2
         with:
@@ -86,10 +92,32 @@ jobs:
           chmod 700 ~/.ssh
           ssh-keyscan -p "${DEPLOY_PORT}" -T 60 -H "${DEPLOY_HOST}" >> ~/.ssh/known_hosts
 
+      # Falha rápido com erro claro se authorized_keys não tiver o par da chave do secret.
+      - name: Testar SSH (autenticação por chave)
+        run: |
+          set -euo pipefail
+          SSH=(
+            ssh
+            -p "${DEPLOY_PORT}"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -i "${HOME}/.ssh/id_rsa"
+          )
+          "${SSH[@]}" -o ConnectTimeout=15 "${DEPLOY_USER}@${DEPLOY_HOST}" "echo ok"
+
       - name: rsync
         run: |
           set -euo pipefail
           test -n "${DEPLOY_DEST}" || { echo "::error::Defina DEPLOY_APP_PATH como variable ou Secret."; exit 1; }
+          RSYNC_SSH=(
+            ssh
+            -p "${DEPLOY_PORT}"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -i "${HOME}/.ssh/id_rsa"
+          )
           EXTRA_DELETE=""
           if [ "${DEPLOY_RSYNC_DELETE}" = "true" ]; then
             EXTRA_DELETE="--delete"
@@ -99,7 +127,7 @@ jobs:
           fi
           rsync -avz ${EXTRA_DELETE} \
             --exclude-from=".github/rsync-exclude.txt" \
-            -e "ssh -p ${DEPLOY_PORT} -o StrictHostKeyChecking=yes" \
+            -e "${RSYNC_SSH[*]}" \
             "./" \
             "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_DEST}/"
 
@@ -110,7 +138,12 @@ jobs:
           REMOTE_HOME: ${{ env.DEPLOY_DEST }}
         run: |
           set -euo pipefail
-          ssh -p "${DEPLOY_PORT}" -o StrictHostKeyChecking=yes \
+          ssh \
+            -p "${DEPLOY_PORT}" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -i "${HOME}/.ssh/id_rsa" \
             "${DEPLOY_USER}@${DEPLOY_HOST}" \
             "set -euo pipefail; cd \"${REMOTE_HOME}\"; sudo docker compose -f \"${COMPOSE}\" up -d --build"
 
@@ -124,7 +157,12 @@ jobs:
           SERVICE: ${{ vars.DEPLOY_DOCKER_SERVICE != '' && vars.DEPLOY_DOCKER_SERVICE || 'app' }}
         run: |
           set -euo pipefail
-          ssh -p "${DEPLOY_PORT}" -o StrictHostKeyChecking=yes \
+          ssh \
+            -p "${DEPLOY_PORT}" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -i "${HOME}/.ssh/id_rsa" \
             "${DEPLOY_USER}@${DEPLOY_HOST}" \
             "set -euo pipefail; cd \"${REMOTE_HOME}\"; \
             sudo docker compose -f \"${COMPOSE}\" exec -T \"${SERVICE}\" php artisan migrate:status --no-ansi; \
