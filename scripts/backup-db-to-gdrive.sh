@@ -28,6 +28,29 @@ if [[ ! -f "$ROOT/.env" ]]; then
   exit 1
 fi
 
+# Lê GOOGLE_DRIVE_CLIENT_ID / GOOGLE_DRIVE_CLIENT_SECRET do .env (VPS) e exporta para o rclone
+# (RCLONE_CONFIG_<NOME_REMOTO>_*) — alinhado com o remoto em RCLONE_REMOTE (ex.: gdrive).
+_env_val() {
+  local k="$1" line
+  line="$(grep "^${k}=" "$ROOT/.env" 2>/dev/null | tail -1)" || true
+  [[ -n "$line" ]] || { echo ""; return 0; }
+  line="${line#*=}"
+  line="${line%$'\r'}"
+  line="${line//\"/}"
+  line="${line//\'/}"
+  echo "${line//$'\r'/}"
+}
+GD_ID="$(_env_val GOOGLE_DRIVE_CLIENT_ID)"
+GD_SEC="$(_env_val GOOGLE_DRIVE_CLIENT_SECRET)"
+if [[ -n "$GD_ID" && -n "$GD_SEC" ]]; then
+  # Nome da secção rclone [remoto] → RCLONE_CONFIG_<REMOTO>_ (maiúsculas, não alfanuméricos → _)
+  _RNAME="$(printf '%s' "$RCLONE_REMOTE" | tr '[:lower:]' '[:upper:]' | tr -c 'A-Z0-9' '_')"
+  _RNAME="${_RNAME#_}"
+  _RNAME="${_RNAME%_}"
+  export "RCLONE_CONFIG_${_RNAME}_CLIENT_ID=${GD_ID}"
+  export "RCLONE_CONFIG_${_RNAME}_CLIENT_SECRET=${GD_SEC}"
+fi
+
 raw="$(grep '^DB_DATABASE=' "$ROOT/.env" 2>/dev/null | tail -1 | cut -d= -f2- | tr -d '\r')"
 raw="${raw//\"/}"
 raw="${raw//\'/}"

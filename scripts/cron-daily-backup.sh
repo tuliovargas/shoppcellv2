@@ -4,7 +4,8 @@
 #
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-LOGDIR="${HOME:-}/logs"
+# crontab do utilizador costuma definir HOME; se não, grava na raiz do projeto.
+LOGDIR="${HOME:-$ROOT}/logs"
 mkdir -p "$LOGDIR"
 LOG="${LOGDIR}/shoppcell-backup.log"
 
