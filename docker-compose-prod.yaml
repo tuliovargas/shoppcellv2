@@ -26,12 +26,11 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      WAIT: "-wait tcp://app:9000"
       TZ: ${TZ:-UTC}
     volumes:
       - .:/var/www
+      - "./docker/nginx/ssl:/etc/nginx/ssl/custom:ro"
       - "/etc/localtime:/etc/localtime:ro"
-      - "/etc/ssl/certs/:/etc/ssl/certs:ro"
     networks:
       - app-network
     depends_on:

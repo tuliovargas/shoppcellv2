@@ -2,15 +2,19 @@
 set -eu
 cd /var/www
 
-# Config (sem templating dockerize; evita amd64 só em amd64 VPS)
-cp ./docker/nginx/nginx.conf /etc/nginx/conf.d/nginx.conf
+OUT=/etc/nginx/conf.d/default.conf
+cp ./docker/nginx/nginx.conf "${OUT}"
 
-# Espera PHP-FPM (netcat instalado na imagem)
+if [ -r /etc/nginx/ssl/custom/fullchain.pem ] && [ -r /etc/nginx/ssl/custom/privkey.pem ]; then
+  printf '\n' >> "${OUT}"
+  cat ./docker/nginx/nginx-443.conf.optional >> "${OUT}"
+fi
+
 i=0
 while ! nc -z app 9000; do
   i=$((i + 1))
   if [ "$i" -ge 120 ]; then
-    echo ":: error: timeout à espera de app:9000" >&2
+    echo "error: timeout à espera de app:9000" >&2
     exit 1
   fi
   sleep 1

@@ -17,6 +17,10 @@
 # --- Credenciais ---
 .env
 
+# Certificados TLS só na VPS (nomes fixos usados pelo nginx)
+/docker/nginx/ssl/fullchain.pem
+/docker/nginx/ssl/privkey.pem
+
 # --- Laravel runtime (servidor gere localmente; não pisar uploads/sessões) ---
 /storage/logs/
 /storage/framework/

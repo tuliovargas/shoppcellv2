@@ -33,6 +33,7 @@ name: Deploy (rsync → VPS)
 #   SKIP_DOCKER_RESTART = true para não subir/atualizar stacks com docker compose na VPS.
 #   DEPLOY_COMPOSE_BUILD = true para correr também --build após código copiado (Dockerfiles/context).
 #                             Por omissão é só docker compose up -d — imagens ficam iguais; código PHP atualiza pelo volume montado (.:/var/www).
+#   HTTPS (produção): coloca docker/nginx/ssl/fullchain.pem + privkey.pem na VPS — o rsync não os substitui; rebuild nginx se mudares certs.
 #   DEPLOY_RSYNC_DELETE = true para ativar --delete no rsync (por omissão NÃO há --delete,
 #                             mais seguro para ficheiros que existem só no servidor.)
 #   SKIP_ARTISAN_AFTER_DEPLOY = true para NÃO executar migrate + optimize:clear após compose.
