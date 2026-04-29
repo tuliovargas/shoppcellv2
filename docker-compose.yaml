@@ -4,7 +4,8 @@ services:
   app:
     build: docker/app
     container_name: app
-    entrypoint: ./docker/app/entrypoint.sh
+    # bash explícito: bind .:/var/www traz o repo do host; sem +x o exec do path direto falha (ex.: rsync do Windows).
+    entrypoint: ["/bin/bash", "./docker/app/entrypoint.sh"]
     restart: always
     environment:
       - TZ=${TZ:-UTC}
@@ -32,7 +33,7 @@ services:
   nginx:
     build: docker/nginx
     container_name: nginx
-    entrypoint: ./docker/nginx/entrypoint.sh
+    entrypoint: ["/bin/sh", "./docker/nginx/entrypoint.sh"]
     restart: always
     tty: true
     ports:
