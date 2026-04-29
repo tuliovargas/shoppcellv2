@@ -31,6 +31,8 @@ name: Deploy (rsync → VPS)
 #   DEPLOY_SSH_PORT (default 22)
 #   DEPLOY_COMPOSE_FILE (default docker-compose.yaml em script remoto)
 #   SKIP_DOCKER_RESTART = true para não subir/atualizar stacks com docker compose na VPS.
+#   DEPLOY_COMPOSE_BUILD = true para correr também --build após código copiado (Dockerfiles/context).
+#                             Por omissão é só docker compose up -d — imagens ficam iguais; código PHP atualiza pelo volume montado (.:/var/www).
 #   DEPLOY_RSYNC_DELETE = true para ativar --delete no rsync (por omissão NÃO há --delete,
 #                             mais seguro para ficheiros que existem só no servidor.)
 #   SKIP_ARTISAN_AFTER_DEPLOY = true para NÃO executar migrate + optimize:clear após compose.
@@ -62,6 +64,7 @@ jobs:
       DEPLOY_DEST: ${{ vars.DEPLOY_APP_PATH != '' && vars.DEPLOY_APP_PATH || secrets.DEPLOY_APP_PATH }}
       DEPLOY_PORT: ${{ vars.DEPLOY_SSH_PORT != '' && vars.DEPLOY_SSH_PORT || secrets.DEPLOY_SSH_PORT != '' && secrets.DEPLOY_SSH_PORT || '22' }}
       DEPLOY_RSYNC_DELETE: ${{ vars.DEPLOY_RSYNC_DELETE != '' && vars.DEPLOY_RSYNC_DELETE || secrets.DEPLOY_RSYNC_DELETE }}
+      DEPLOY_COMPOSE_BUILD: ${{ vars.DEPLOY_COMPOSE_BUILD != '' && vars.DEPLOY_COMPOSE_BUILD || secrets.DEPLOY_COMPOSE_BUILD }}
 
     steps:
       - uses: actions/checkout@v4
@@ -138,6 +141,13 @@ jobs:
           REMOTE_HOME: ${{ env.DEPLOY_DEST }}
         run: |
           set -euo pipefail
+          EXTRA_BUILD=""
+          if [ "${DEPLOY_COMPOSE_BUILD}" = "true" ]; then
+            EXTRA_BUILD=" --build"
+            echo "::notice::docker compose up com --build (DEPLOY_COMPOSE_BUILD=true)."
+          else
+            echo "::notice::docker compose up -d SEM --build; alteraste Dockerfiles/context? põe DEPLOY_COMPOSE_BUILD=true."
+          fi
           ssh \
             -p "${DEPLOY_PORT}" \
             -o BatchMode=yes \
@@ -145,7 +155,7 @@ jobs:
             -o StrictHostKeyChecking=yes \
             -i "${HOME}/.ssh/id_rsa" \
             "${DEPLOY_USER}@${DEPLOY_HOST}" \
-            "set -euo pipefail; cd \"${REMOTE_HOME}\"; sudo docker compose -f \"${COMPOSE}\" up -d --build"
+            "set -euo pipefail; cd \"${REMOTE_HOME}\"; sudo docker compose -f \"${COMPOSE}\" up -d${EXTRA_BUILD}"
 
       # Estado das migrations → migrate --force (sem interação) → limpar caches (config/cached views/routes, etc.).
       # O .env na VPS não entra no rsync — ver .github/rsync-exclude.txt (.env está excluído).
@@ -165,6 +175,12 @@ jobs:
             -i "${HOME}/.ssh/id_rsa" \
             "${DEPLOY_USER}@${DEPLOY_HOST}" \
             "set -euo pipefail; cd \"${REMOTE_HOME}\"; \
+            echo 'À espera do MariaDB (evita HY000 Connection refused antes do servidor aceitar tráfego)...'; \
+            ok=0; for i in \$(seq 1 120); do \
+              if sudo docker compose -f \"${COMPOSE}\" exec -T db mysqladmin ping -h 127.0.0.1 -uroot -proot --silent 2>/dev/null; then ok=1; echo 'MariaDB respondeu.'; break; fi; \
+              sleep 2; \
+            done; \
+            if [ \"\$ok\" != 1 ]; then echo '::error::Timeout (4 min): MariaDB não responde no serviço db. Verifica o contentor db e .env DB_HOST=db.' 1>&2; exit 1; fi; \
             sudo docker compose -f \"${COMPOSE}\" exec -T \"${SERVICE}\" php artisan migrate:status --no-ansi; \
             sudo docker compose -f \"${COMPOSE}\" exec -T \"${SERVICE}\" php artisan migrate --force --no-interaction; \
             sudo docker compose -f \"${COMPOSE}\" exec -T \"${SERVICE}\" php artisan optimize:clear --no-interaction"
