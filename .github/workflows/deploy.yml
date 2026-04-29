@@ -60,6 +60,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Falha com mensagem clara se faltarem variables no repositório (Settings → Variables).
+      - name: Verificar variables de deploy
+        run: |
+          set -euo pipefail
+          err=0
+          if [ -z "${{ vars.DEPLOY_SSH_HOST }}" ]; then echo "::error::Cria a Repository variable DEPLOY_SSH_HOST (ex.: IP ou hostname da VPS)."; err=1; fi
+          if [ -z "${{ vars.DEPLOY_SSH_USER }}" ]; then echo "::error::Cria a Repository variable DEPLOY_SSH_USER (ex.: opc)."; err=1; fi
+          if [ -z "${{ vars.DEPLOY_APP_PATH }}" ]; then echo "::error::Cria a Repository variable DEPLOY_APP_PATH (ex.: /home/opc/apps/shoppcell)."; err=1; fi
+          exit $err
+
       # Necessário se usares SSH (rsync -e ssh) e comando remoto com docker compose.
       - name: Chave SSH (transporte rsync / comando remoto)
         uses: shimataro/ssh-key-action@v2
