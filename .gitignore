@@ -38,6 +38,7 @@ lerna-debug.log*
 
 # enviroment variables
 .env
+.mysql-credentials-once-delete-after-copy.txt
 docker/dbdata
 composer.lock
 package-lock.json

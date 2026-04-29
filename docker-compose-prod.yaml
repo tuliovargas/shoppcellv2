@@ -64,8 +64,8 @@ services:
     environment:
       - TZ=${TZ:-UTC}
       - MYSQL_DATABASE=env_db
-      # Palavra-passe real deve estar em `.env` (DB_PASSWORD na raiz — compose lê automaticamente).
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-root}
+      # root MariaDB — variável própria (não usar a mesma do utilizador Laravel).
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
     networks:
       - app-network
 
@@ -82,9 +82,9 @@ services:
       - ./docker/pma:/var/www/app/
     environment:
       - PMA_USER=root
-      - PMA_PASSWORD=${DB_PASSWORD:-root}
+      - PMA_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
       - PMA_HOST=db
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-root}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
       - PMA_ARBITRARY=1
       - PMA_PORT=3306
       - UPLOAD_LIMIT=64M
