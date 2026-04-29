@@ -2,8 +2,7 @@ FROM nginx:1.15.0-alpine
 
 RUN apk add --no-cache netcat-openbsd ca-certificates openssl
 
-# Limpar configs default da imagem; em seguida map Cloudflare (/etc/nginx/conf.d primeiro no include).
+# Map Cloudflare (00-map) é copiado em runtime pelo entrypoint a partir de /var/www (volume); não COPY na imagem.
 RUN rm -f /etc/nginx/conf.d/*.conf
-COPY docker/nginx/conf.d/*.conf /etc/nginx/conf.d/
 
 WORKDIR /var/www

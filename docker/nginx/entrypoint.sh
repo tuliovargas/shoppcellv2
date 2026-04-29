@@ -2,6 +2,17 @@
 set -eu
 cd /var/www
 
+# $fcgi_forwarded_scheme (map) tem de existir antes do include laravel-php.inc.
+# Copiar do volume montado (.:/var/www) — não depender só da imagem Docker no build
+# (na VPS faltava 00-map → "unknown fcgi_forwarded_scheme" → nginx -t falhava → 521 na Cloudflare).
+MAP_SRC=./docker/nginx/conf.d/00-map-cloudflare.conf
+MAP_DST=/etc/nginx/conf.d/00-map-cloudflare.conf
+if [ ! -f "$MAP_SRC" ]; then
+  echo "error: em falta $MAP_SRC (define o map X-Forwarded-Proto vs \$scheme)" >&2
+  exit 1
+fi
+cp "$MAP_SRC" "$MAP_DST"
+
 OUT=/etc/nginx/conf.d/default.conf
 cp ./docker/nginx/nginx.conf "${OUT}"
 
@@ -57,4 +68,5 @@ while ! nc -z app 9000; do
   sleep 1
 done
 
+nginx -t
 exec nginx -g "daemon off;"
