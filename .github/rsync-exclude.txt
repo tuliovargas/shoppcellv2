@@ -1,0 +1,47 @@
+# --- Repositório / IDE ---
+.git/
+.idea/
+.vscode/
+
+# Composer / NPM (repos normalmente sem estes ao commit; servidor regera via entrypoint/npm se precisarem)
+/vendor/
+/node_modules/
+
+# --- IMPORTANTE — volumes Docker na pasta do projeto (NÃO apagar/sync do host) ---
+# Dados brutos MariaDB/MySQL — são o próprio «ficheiros da base de dados».
+/docker/dbdata/
+
+# dumps .sql grandes deixados no servidor
+/docker/dumps/
+
+# --- Credenciais ---
+.env
+
+# --- Laravel runtime (servidor gere localmente; não pisar uploads/sessões) ---
+/storage/logs/
+/storage/framework/
+
+# Laravel: ficheiros de utilizadores no disco público/privados (imagens PDV, uploads, etc.)
+/storage/app/public/
+/storage/app/private/
+/storage/app/backups/
+
+# Se criares outros discos apenas no servidor sob storage/app/, protege assim:
+/storage/app/**/upload/
+/storage/backups/
+
+# Chaves Laravel
+/storage/*.key
+
+# Cache bootstrap gerado
+/bootstrap/cache/
+
+# --- Public: uploads diretos ou symlink público ---
+# Symlink público típico a public/storage → não pisar servidor
+/public/storage/
+/public/uploads/
+
+# NPM / Yarn
+npm-debug.log*
+pnpm-debug.log*
+.yarn/

@@ -1,0 +1,121 @@
+name: Deploy (rsync → VPS)
+
+# Fluxo:
+#   1) checkout no runner
+#   2) rsync do código até DEPLOY_APP_PATH na VPS (--exclude-from)
+#   3) (opcional) ssh … sudo docker compose up -d --build
+#
+# Não há git pull/clonagem na VPS — apenas ficheiros copiados.
+#
+# Observação importante: rsync em pastas remotas COSTUMA usar transporte SSH
+# (-e ssh). Ou seja, mesmo sem "chave de deploy Git" na VPS, quase sempre
+# ainda será necessário UM segredo de autenticação para alcançar o servidor —
+# habitualmente DEPLOY_SSH_PRIVATE_KEY só para esse acesso.
+# Para rsync só por rede sem SSH (daemon na porta 873 ou outra), teria de
+# ser outro playbook.
+#
+# Secrets:
+#   DEPLOY_SSH_PRIVATE_KEY  (opcional apenas se removeres os passos que usam SSH;
+#                             na prática o rsync habitual precisa.)
+# Opcional:
+#   — (adicione outros segredos se usares método em que estas variáveis apontariam só para SCP/rsync doutro tipo)
+#
+# Variables:
+#   DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_APP_PATH
+# Opcional:
+#   DEPLOY_SSH_PORT (default 22)
+#   DEPLOY_COMPOSE_FILE (default docker-compose.yaml em script remoto)
+#   SKIP_DOCKER_RESTART = true para não subir/atualizar stacks com docker compose na VPS.
+#   DEPLOY_RSYNC_DELETE = true para ativar --delete no rsync (por omissão NÃO há --delete,
+#                             mais seguro para ficheiros que existem só no servidor.)
+#   SKIP_ARTISAN_AFTER_DEPLOY = true para NÃO executar migrate + optimize:clear após compose.
+#   DEPLOY_DOCKER_SERVICE = nome do serviço PHP no compose (default: app — usado em docker compose exec …).
+#
+# Dados típicos a não pisar/registar em exclude: ver .github/rsync-exclude.txt
+# (principal: docker/dbdata = ficheiros do MariaDB dentro do projeto; uploads em storage/, etc.)
+
+concurrency:
+  group: deploy-shoppcell
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rsync-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      DEPLOY_HOST: ${{ vars.DEPLOY_SSH_HOST }}
+      DEPLOY_USER: ${{ vars.DEPLOY_SSH_USER }}
+      DEPLOY_DEST: ${{ vars.DEPLOY_APP_PATH }}
+      DEPLOY_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
+      DEPLOY_RSYNC_DELETE: ${{ vars.DEPLOY_RSYNC_DELETE }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Necessário se usares SSH (rsync -e ssh) e comando remoto com docker compose.
+      - name: Chave SSH (transporte rsync / comando remoto)
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          known_hosts: unnecessary
+          if_key_exists: replace
+
+      - name: known_hosts para a VPS
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -p "${DEPLOY_PORT}" -T 60 -H "${DEPLOY_HOST}" >> ~/.ssh/known_hosts
+
+      - name: rsync
+        run: |
+          set -euo pipefail
+          test -n "${DEPLOY_DEST}" || { echo "::error::Defina DEPLOY_APP_PATH nas variables."; exit 1; }
+          EXTRA_DELETE=""
+          if [ "${DEPLOY_RSYNC_DELETE}" = "true" ]; then
+            EXTRA_DELETE="--delete"
+            echo "::notice::rsync com --delete (revê .github/rsync-exclude.txt + backups antes)."
+          else
+            echo "::notice::rsync SEM --delete por omissão (mais seguro para ficheiros só no servidor)."
+          fi
+          rsync -avz ${EXTRA_DELETE} \
+            --exclude-from=".github/rsync-exclude.txt" \
+            -e "ssh -p ${DEPLOY_PORT} -o StrictHostKeyChecking=yes" \
+            "./" \
+            "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_DEST}/"
+
+      - name: docker compose na VPS (SSH)
+        if: ${{ vars.SKIP_DOCKER_RESTART != 'true' }}
+        env:
+          COMPOSE: ${{ vars.DEPLOY_COMPOSE_FILE != '' && vars.DEPLOY_COMPOSE_FILE || 'docker-compose.yaml' }}
+          REMOTE_HOME: ${{ vars.DEPLOY_APP_PATH }}
+        run: |
+          set -euo pipefail
+          ssh -p "${DEPLOY_PORT}" -o StrictHostKeyChecking=yes \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "set -euo pipefail; cd \"${REMOTE_HOME}\"; sudo docker compose -f \"${COMPOSE}\" up -d --build"
+
+      # Estado das migrations → migrate --force (sem interação) → limpar caches (config/cached views/routes, etc.).
+      # O .env na VPS não entra no rsync — ver .github/rsync-exclude.txt (.env está excluído).
+      - name: Laravel na VPS — migrations + limpar caches
+        if: ${{ vars.SKIP_ARTISAN_AFTER_DEPLOY != 'true' }}
+        env:
+          COMPOSE: ${{ vars.DEPLOY_COMPOSE_FILE != '' && vars.DEPLOY_COMPOSE_FILE || 'docker-compose.yaml' }}
+          REMOTE_HOME: ${{ vars.DEPLOY_APP_PATH }}
+          SERVICE: ${{ vars.DEPLOY_DOCKER_SERVICE != '' && vars.DEPLOY_DOCKER_SERVICE || 'app' }}
+        run: |
+          set -euo pipefail
+          ssh -p "${DEPLOY_PORT}" -o StrictHostKeyChecking=yes \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "set -euo pipefail; cd \"${REMOTE_HOME}\"; \
+            sudo docker compose -f \"${COMPOSE}\" exec -T \"${SERVICE}\" php artisan migrate:status --no-ansi; \
+            sudo docker compose -f \"${COMPOSE}\" exec -T \"${SERVICE}\" php artisan migrate --force --no-interaction; \
+            sudo docker compose -f \"${COMPOSE}\" exec -T \"${SERVICE}\" php artisan optimize:clear --no-interaction"
