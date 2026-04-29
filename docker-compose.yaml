@@ -54,12 +54,13 @@ services:
     container_name: db
     restart: always
     tty: true
+    # Script oficial da imagem MariaDB (evita falhas com mysqladmin/sockets em versões novas).
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
-      interval: 5s
-      timeout: 5s
-      retries: 30
-      start_period: 30s
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 10s
+      retries: 36
+      start_period: 120s
     ports:
       - "3306:3306"
     volumes:

@@ -177,7 +177,7 @@ jobs:
             "set -euo pipefail; cd \"${REMOTE_HOME}\"; \
             echo 'À espera do MariaDB (evita HY000 Connection refused antes do servidor aceitar tráfego)...'; \
             ok=0; for i in \$(seq 1 120); do \
-              if sudo docker compose -f \"${COMPOSE}\" exec -T db mysqladmin ping -h 127.0.0.1 -uroot -proot --silent 2>/dev/null; then ok=1; echo 'MariaDB respondeu.'; break; fi; \
+              if sudo docker compose -f \"${COMPOSE}\" exec -T db healthcheck.sh --connect --innodb_initialized 2>/dev/null; then ok=1; echo 'MariaDB respondeu.'; break; fi; \
               sleep 2; \
             done; \
             if [ \"\$ok\" != 1 ]; then echo '::error::Timeout (4 min): MariaDB não responde no serviço db. Verifica o contentor db e .env DB_HOST=db.' 1>&2; exit 1; fi; \
