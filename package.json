@@ -1,0 +1,52 @@
+{
+	"private": true,
+	"scripts": {
+		"dev": "run-p dev-laravel watch",
+		"dev-laravel": "php artisan serve",
+		"development": "mix",
+		"watch": "mix watch",
+		"watch-poll": "mix watch -- --watch-options-poll=1000",
+		"hot": "mix watch --hot",
+		"prod": "npm run production",
+		"production": "mix --production"
+	},
+	"devDependencies": {
+		"@types/canvas-confetti": "^1.4.2",
+		"axios": "^0.21",
+		"bootstrap": "^4.0.0",
+		"jquery": "^3.5.1",
+		"laravel-mix": "^6.0.6",
+		"lodash": "^4.17.19",
+		"popper.js": "^1.12",
+		"postcss": "^8.1.14",
+		"resolve-url-loader": "^2.3.1",
+		"run-p": "0.0.0",
+		"sass": "^1.20.1",
+		"sass-loader": "^8.0.0",
+		"vue": "^2.5.17",
+		"vue-flatpickr-component": "8",
+		"vue-loader": "^15.9.5",
+		"vue-template-compiler": "^2.6.10",
+		"vuejs-datepicker": "^1.6.2"
+	},
+	"dependencies": {
+		"@brazilian-utils/brazilian-utils": "^1.0.0-rc.12",
+		"@fortawesome/fontawesome-free": "^5.15.1",
+		"admin-lte": "^3.0",
+		"apexcharts": "^3.35.0",
+		"canvas-confetti": "^1.5.1",
+		"chart.js": "^2.9.4",
+		"mime-db": "^1.46.0",
+		"moment": "^2.29.1",
+		"npm-run-all": "^4.1.5",
+		"simplelightbox": "^2.7.0",
+		"v-money": "^0.8.1",
+		"vue-apexcharts": "^1.6.2",
+		"vue-html-to-paper": "1.3.1",
+		"vue-loading-overlay": "^3.4.2",
+		"vue-multiselect": "^2.1.6",
+		"vue-the-mask": "^0.11.1",
+		"vuex": "^3.6.2",
+		"yup": "^0.32.9"
+	}
+}

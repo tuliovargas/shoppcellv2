@@ -1,0 +1,72 @@
+# compiled output
+/dist
+/node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Tests
+/coverage
+/.nyc_output
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+/.vscode/*
+**/.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# enviroment variables
+.env
+docker/dbdata
+composer.lock
+package-lock.json
+vendor
+# /public/js
+# /public/css
+# /public/mix-manifest.json
+client_secret.json
+access_token.json
+/.composer
+.composer
+
+# Junk / pasted shell artifacts / secrets at repo root (do not commit)
+.config/psysh/
+.bash_history
+/--all-databases
+/--single-transaction
+/=
+/exporting
+/unpacking
+/naming
+/mariadb_repo_setup
+/mysqldump
+/nano.save
+/CACHED
+/CANCELED
+/ERROR
+/shoppcell-deploy.bundle
+/admin-lte@3.0.5
+/backup*.sql
+/backup_pdv.sql
+/pdvlaravel/

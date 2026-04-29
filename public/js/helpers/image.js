@@ -1,0 +1,1 @@
+window.preview=function(e,a){var n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:"image";if(e){var r=new FileReader;r.readAsDataURL(e),r.onload=function(){"image"==n?a.src=r.result:a.style.background="url(".concat(r.result,") 50%")}}};
