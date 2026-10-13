@@ -1,0 +1,30 @@
+---
+description: Database and data integrity standards
+alwaysApply: true
+---
+
+# DATABASE STANDARD
+
+Treat the database as a contract.
+
+Before changing data structures:
+1. Inspect current schema/migrations.
+2. Inspect relationships.
+3. Search all consumers.
+4. Consider existing records.
+5. Consider indexes and constraints.
+6. Consider deployment order.
+7. Consider rollback.
+
+## RULES
+
+- Use appropriate constraints.
+- Use foreign keys where consistent with the project.
+- Add indexes based on query patterns, not speculation.
+- Avoid storing derived data unless there is a clear reason.
+- Preserve data integrity.
+- Avoid destructive migrations unless explicitly authorized.
+- Never silently delete production data.
+- Do not change column meaning without migration and compatibility analysis.
+
+Document significant schema decisions in the relevant Spec or database documentation.

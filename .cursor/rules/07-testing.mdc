@@ -1,0 +1,33 @@
+---
+description: Testing and quality assurance standards
+alwaysApply: true
+---
+
+# TESTING STANDARD
+
+Every behavior change should have verification appropriate to its risk.
+
+## TEST PRIORITY
+
+Prefer, when applicable:
+1. Unit tests for isolated business rules.
+2. Integration tests for component interactions.
+3. API/feature tests for externally observable behavior.
+4. End-to-end tests for critical user journeys.
+
+## BUGFIX RULE
+
+Every meaningful bugfix should add or update a regression test whenever practical.
+
+## TEST QUALITY
+
+Tests should:
+- verify behavior, not implementation trivia;
+- cover happy paths;
+- cover important validation failures;
+- cover authorization;
+- cover edge cases;
+- avoid unnecessary coupling;
+- be deterministic.
+
+Do not claim success without actually running available tests/checks or clearly state that verification was not run.

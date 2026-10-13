@@ -231,14 +231,12 @@ class ReportController extends Controller
         ->orderBy('name')
         ->get();
 
-        $clients = Client::whereHas('orders')
-            ->orderBy('full_name')
-            ->get();
+        $selectedClient = ($clientId && $clientId != '0') ? Client::find($clientId) : null;
 
         return view('reports.sales')
             ->with('orders', $orders)
             ->with('users', $users)
-            ->with('clients', $clients)
+            ->with('selectedClient', $selectedClient)
             ->with('clientId', $clientId)
             ->with('sellerId', $sellerId)
             ->with('status', $status)

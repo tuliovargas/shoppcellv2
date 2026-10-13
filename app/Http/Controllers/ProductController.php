@@ -9,6 +9,7 @@ use App\Http\Resources\ProductStockLogResource;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\Product\DataTableProductService;
 use App\Services\Product\IndexProductService;
 use App\Services\Product\StoreProductService;
 use App\Services\Product\UpdateProductService;
@@ -61,11 +62,10 @@ class ProductController extends Controller
      * @param Request $request
      * @return Application|Factory|View
      */
-    public function index(Request $request)
+    public function index(Request $request, DataTableProductService $dataTableProductService)
     {
-        $search = null;
-        if ($request->search) {
-            $search = $request->search;
+        if ($request->has('draw')) {
+            return $dataTableProductService->run();
         }
 
         if ($request->expectsJson()) {
@@ -73,16 +73,7 @@ class ProductController extends Controller
             return response($products);
         }
 
-        $request->merge([
-            'paginate' => 'false',
-            'category' =>  0,
-        ]);
-
-        $products = $this->indexProductService->run($request);
-
-        return view('products.index')
-            ->with('products', $products)
-            ->with('search', $search);
+        return view('products.index');
     }
 
     /**

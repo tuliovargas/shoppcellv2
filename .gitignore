@@ -73,3 +73,8 @@ access_token.json
 /pdvlaravel/
 /vps-sync/
 *.env.vps
+work.txt
+ssh-key-2026-04-06.key
+
+# Backups baixados do servidor (banco e configs). Nao versionar.
+/backups/

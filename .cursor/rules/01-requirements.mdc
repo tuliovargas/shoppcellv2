@@ -1,0 +1,55 @@
+---
+description: Rules for BRD, PRD and requirements analysis
+globs: ["docs/BRD.md", "docs/PRD.md", "docs/specs/**/*.md"]
+alwaysApply: false
+---
+
+# REQUIREMENTS STANDARD
+
+Requirements must be separated into business intent, product behavior and technical implementation.
+
+## BRD — BUSINESS REQUIREMENTS
+
+BRD answers:
+- Why does the business need this?
+- What problem is being solved?
+- Who are the stakeholders?
+- What business outcome is expected?
+- What constraints and business rules exist?
+
+Do not put implementation details in the BRD unless they are genuine business constraints.
+
+## PRD — PRODUCT REQUIREMENTS
+
+PRD answers:
+- What should the product do?
+- Who uses it?
+- What are the user journeys?
+- What are the functional requirements?
+- What are the acceptance criteria?
+- What is MVP vs future scope?
+
+Each requirement should be testable whenever possible.
+
+## REQUIREMENT TRACEABILITY
+
+Every meaningful feature should be traceable:
+
+BRD
+→ PRD
+→ SDD
+→ Feature Spec
+→ Implementation
+→ Tests
+
+When a change affects an existing requirement, update the relevant documentation instead of creating conflicting documentation.
+
+## ACCEPTANCE CRITERIA
+
+Prefer explicit criteria:
+
+Given [context]
+When [action]
+Then [expected result]
+
+Avoid vague criteria such as "works correctly" or "user-friendly" without measurable meaning.

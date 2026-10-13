@@ -1,0 +1,18 @@
+---
+description: Documentation synchronization rules
+alwaysApply: true
+---
+
+# DOCUMENTATION STANDARD
+
+Documentation must describe the current intended behavior.
+
+When behavior changes:
+- update the relevant Feature Spec;
+- update API documentation if the contract changes;
+- update architecture documentation if architecture changes;
+- update README/setup documentation when developer workflow changes.
+
+Do not create duplicate documentation when an existing document should be updated.
+
+Documentation should be concise, factual and maintainable.

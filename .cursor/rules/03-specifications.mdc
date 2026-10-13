@@ -1,0 +1,57 @@
+---
+description: Feature specification and technical specification rules
+globs: ["docs/specs/**/*.md", "docs/TSD.md"]
+alwaysApply: false
+---
+
+# TECHNICAL SPECIFICATION STANDARD
+
+Feature Specs are the executable technical contract between requirements and implementation.
+
+A Spec should contain enough information for another competent engineer or coding agent to implement the feature without guessing.
+
+## REQUIRED SPEC SECTIONS
+
+# Feature Name
+
+## 1. Objective
+## 2. Context
+## 3. Scope
+## 4. Functional Requirements
+## 5. Business Rules
+## 6. User Flows
+## 7. Data Model
+## 8. API / Interfaces
+## 9. Backend
+## 10. Frontend
+## 11. Permissions
+## 12. Validation
+## 13. Error Handling
+## 14. Security
+## 15. Performance
+## 16. Events / Jobs / Notifications
+## 17. Tests
+## 18. Acceptance Criteria
+## 19. Impact
+## 20. Decisions / Open Questions
+## 21. Status
+
+Not every section needs content. Use "N/A" only when the section genuinely does not apply.
+
+## SPEC RULES
+
+- Do not describe behavior that the code does not implement unless the Spec is explicitly a target-state specification.
+- When implementation changes behavior, update the Spec.
+- Avoid implementation details that are not relevant to the feature.
+- Record important technical decisions and rejected alternatives.
+- Do not leave contradictory rules across multiple Specs.
+
+## STATUS
+
+Use one:
+- DRAFT
+- READY
+- IN_PROGRESS
+- IMPLEMENTED
+- VERIFIED
+- DEPRECATED

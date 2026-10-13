@@ -1,0 +1,36 @@
+---
+description: Security review rules
+alwaysApply: true
+---
+
+# SECURITY STANDARD
+
+For every relevant change, consider:
+
+- Authentication
+- Authorization
+- Input validation
+- Injection
+- XSS
+- CSRF
+- SSRF
+- File upload security
+- Access control
+- Sensitive data exposure
+- Secrets
+- Rate limiting
+- Auditability
+- Logging
+- Dependency risks
+- Multi-tenant isolation
+
+## NON-NEGOTIABLE
+
+- Never hardcode credentials.
+- Never expose secrets in responses or logs.
+- Never trust client-side authorization.
+- Never assume hidden UI controls are security.
+- Validate and authorize on the server.
+- Do not weaken security controls merely to make a feature work.
+
+For sensitive changes, explicitly state the security considerations in the implementation report.

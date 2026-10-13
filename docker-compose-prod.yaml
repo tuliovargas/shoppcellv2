@@ -9,6 +9,7 @@ services:
     volumes:
       - .:/var/www
       - ./docker/app/prod.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./docker/app/zzz-performance.conf:/usr/local/etc/php-fpm.d/zzz-performance.conf:ro
       - "/etc/localtime:/etc/localtime:ro"
     networks:
       - app-network

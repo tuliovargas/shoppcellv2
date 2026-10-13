@@ -30,13 +30,10 @@
                                                 data-placeholder="Selecione o Cliente"
                                                 style="width: 100%;">
 
-                                            <option value="0">Todos os Clientes</option>
-
-                                            @foreach ($clients as $client)
-                                                <option {{ $client->id == $clientId ? 'selected' : '' }} value="{{ $client->id }}">
-                                                    {{ $client->full_name }}
-                                                </option>
-                                            @endforeach
+                                            <option value="0" {{ empty($clientId) ? 'selected' : '' }}>Todos os Clientes</option>
+                                            @if (!empty($selectedClient))
+                                                <option value="{{ $selectedClient->id }}" selected>{{ $selectedClient->full_name }}</option>
+                                            @endif
                                         </select>
                                     </div>
                                 </div>
@@ -203,7 +200,31 @@
 @section('js')
     <script>
     	$(document).ready(function () {
-            $('.select2').select2();
+            $('#seller, #status').select2();
+            $('#client').select2({
+                width: '100%',
+                ajax: {
+                    url: '/clients',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                            type: 'vue',
+                            paginate: 'false'
+                        };
+                    },
+                    processResults: function (data) {
+                        var rows = Array.isArray(data) ? data : (data.data || []);
+                        return {
+                            results: rows.map(function (client) {
+                                return { id: client.id, text: client.full_name };
+                            })
+                        };
+                    }
+                },
+                minimumInputLength: 2
+            });
         });
 
         $(function() {

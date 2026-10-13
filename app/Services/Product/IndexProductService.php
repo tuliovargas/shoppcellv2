@@ -72,6 +72,10 @@ class IndexProductService
             });
 
         if ($request->paginate === 'false') {
+            if (!empty($search)) {
+                return $query->orderBy('name')->limit(40)->get();
+            }
+
             return $query->get();
         }
 

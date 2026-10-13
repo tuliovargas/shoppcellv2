@@ -67,6 +67,12 @@ class SalesReportService
             ->when($endDate != null, function ($query) use ($endDate){
                 return $query->where('created_at', '<=', $endDate . ' 23:59:59');
             })
+            ->with([
+                'products.byProducts',
+                'client',
+                'seller',
+                'payments.payment_method',
+            ])
             ->orderBy('created_at', 'desc')
             ->get();
 

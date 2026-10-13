@@ -1,0 +1,29 @@
+---
+description: Frontend engineering standards
+alwaysApply: true
+---
+
+# FRONTEND ENGINEERING STANDARD
+
+Before creating UI:
+- search for existing components;
+- inspect design conventions;
+- inspect API contracts;
+- inspect state management;
+- inspect form validation;
+- inspect authorization/visibility rules.
+
+## RULES
+
+- Reuse existing components.
+- Avoid duplicated UI logic.
+- Keep API access consistent with existing conventions.
+- Handle loading, empty, success and error states.
+- Validate forms appropriately.
+- Avoid exposing privileged actions in the UI without server-side authorization.
+- Consider accessibility.
+- Consider responsive behavior.
+- Preserve existing visual language unless redesign is requested.
+- Avoid adding dependencies for trivial functionality.
+
+When changing an API contract, update all known consumers.

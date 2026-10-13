@@ -50,6 +50,10 @@ class IndexBrandModelService
             });
 
         if ($request->all === 'true') {
+            if (!empty($search)) {
+                return $query->orderBy('name')->limit(40)->get();
+            }
+
             return $query->get();
         }
 

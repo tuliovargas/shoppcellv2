@@ -840,6 +840,7 @@ export default {
 			};
 
 			config.params.all = true;
+			config.params.chart = 1;
 			config.params.date_ini = moment(
 				`${this.selectedMonth + 1}/01/${this.selectedYear}`
 			).format();

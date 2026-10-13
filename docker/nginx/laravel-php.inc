@@ -1,3 +1,10 @@
+gzip on;
+gzip_vary on;
+gzip_proxied any;
+gzip_comp_level 5;
+gzip_min_length 1024;
+gzip_types text/plain text/css text/xml text/javascript application/javascript application/x-javascript application/json application/xml application/rss+xml image/svg+xml;
+
 location = /favicon.ico { access_log off; log_not_found off; }
 location = /robots.txt  { access_log off; log_not_found off; }
 

@@ -279,13 +279,30 @@ class IndexCashierInfoService
         }
 
 
-        $cashiers = $query
+        $query = $query
             ->where('created_at', '>=', $date_ini)
             ->where(function ($query) use($date_fim) {
                 $query->where('close_time', '<=', $date_fim)
                       ->orWhereNull('close_time');
             })
-            ->orderBy('created_at', 'desc')->with( 'user',
+            ->orderBy('created_at', 'desc');
+
+        if ($request->filled('chart')) {
+            $chartCashiers = (clone $query)->with(['orders' => function ($orders) {
+                $orders->select('id', 'cashier_info_id', 'created_at');
+            }])->get(['id']);
+
+            return $chartCashiers->map(function ($cashier) {
+                return [
+                    'id' => $cashier->id,
+                    'orders' => $cashier->orders->map(function ($order) {
+                        return ['created_at' => $order->created_at];
+                    })->values(),
+                ];
+            })->values();
+        }
+
+        $cashiers = $query->with( 'user',
 						'orders',
 						'orders.user',
 						'orders.seller',

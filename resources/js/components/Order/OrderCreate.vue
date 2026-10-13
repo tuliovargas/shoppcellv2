@@ -105,7 +105,7 @@
 			</div>
 		</div>
 
-		<div class="card-deck mb-3 flex-nowrap" style="height: calc(80vh - 20px)">
+		<div class="card-deck mb-3 flex-nowrap pdv-deck">
 			<div class="cw-70 px-2">
 				<div class="card mx-0 h-100">
 					<div class="card-body p-4">
@@ -4051,12 +4051,12 @@ export default {
 
 		&__prod-name {
 			width: 25%;
-			min-width: 25%;
+			min-width: 0;
 		}
 
 		&__prod-amount,
 		&__prod-price {
-			min-width: 15%;
+			min-width: 0;
 		}
 
 		&__prod-addition,
@@ -4077,14 +4077,56 @@ export default {
 		opacity: 0.3;
 	}
 
+	.card-deck.pdv-deck {
+		margin-left: 0;
+		margin-right: 0;
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		height: calc(100vh - 270px);
+	}
+
 	.card-deck .cw-70 {
-		flex: 1 0 69.2%;
+		flex: 1 1 69.2%;
 		max-width: 69.2%;
+		min-width: 0;
 	}
 
 	.card-deck .cw-30 {
-		flex: 1 0 30.8%;
+		flex: 1 1 30.8%;
 		max-width: 30.8%;
+		min-width: 0;
+	}
+
+	.cw-70 > .card {
+		min-width: 0;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.cw-70 > .card > .card-body {
+		flex: 1 1 auto;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+		overflow: visible;
+	}
+
+	.cw-70 .table-responsive {
+		flex: 1 1 auto;
+		min-width: 0;
+		min-height: 0;
+		max-width: 100%;
+		height: auto !important;
+		overflow: auto !important;
+	}
+
+	.table-orders {
+		table-layout: fixed;
+		width: 100% !important;
+		min-width: 0 !important;
+		max-width: 100% !important;
 	}
 
 	.cursor-pointer-hover {

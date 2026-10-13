@@ -19,7 +19,7 @@
                     </div>
                     <!-- /.card-header -->
                     <div class="card-body">
-                        <table id="users" class="table table-bordered table-hover">
+                        <table id="users" class="table table-bordered table-hover" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -28,32 +28,7 @@
                                     <th>Ações</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @if (!empty($products))
-                                    @foreach ($products as $product)
-                                        <tr>
-                                            <td>{{ $product->id }}</td>
-                                            <td>
-                                           @if ($product->brandModel && !empty($product->brandModel->photo_url))
-                                            <img width="48" height="48" src="{{ asset('storage/' . $product->brandModel->photo_url) }}">
-                                            </td>
-                                            @else
-                                            <img width="48" height="48" src="{{ asset('images/default-image.png') }}">
-                                            </td>
-                                            @endif
-                                    <td>{{ $product->name }}</td>
-                                    <td>
-                                        <a href="{{ route('products.edit', ['product' => $product->id]) }}">
-                                            <i class="mx-2 fas fa-pen"></i>
-                                        </a>
-                                        <a href="{{ route('products.delete', ['product' => $product->id]) }}">
-                                            <i class="mx-2 fas fa-trash"></i>
-                                        </a>
-                                    </td>
-                                    </tr>
-                                @endforeach
-                                @endif
-                            </tbody>
+                            <tbody></tbody>
                         </table>
                     </div>
                     <!-- /.card-body -->
@@ -70,14 +45,35 @@
     <script>
         $(function() {
             $('#users').DataTable({
-                "paging": true,
-                "pageLength": 100,
-                "lengthChange": false,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "responsive": true,
+                paging: true,
+                pageLength: 100,
+                lengthChange: false,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true,
+                processing: true,
+                serverSide: true,
+                ajax: "{{ route('products.index') }}",
+                order: [[0, 'asc']],
+                language: {
+                    search: 'Pesquisar',
+                    processing: 'Carregando...',
+                    info: 'Mostrando _START_ a _END_ de _TOTAL_ produtos',
+                    infoEmpty: 'Nenhum produto',
+                    zeroRecords: 'Nenhum produto encontrado',
+                    paginate: {
+                        previous: 'Anterior',
+                        next: 'Próximo'
+                    }
+                },
+                columns: [
+                    { data: 'id', name: 'products.id' },
+                    { data: 'image', name: 'image', orderable: false, searchable: false },
+                    { data: 'name', name: 'products.name' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                ]
             });
         });
 

@@ -1,0 +1,46 @@
+---
+description: Backend engineering standards
+alwaysApply: true
+---
+
+# BACKEND ENGINEERING STANDARD
+
+Respect the backend framework and conventions already used by the project.
+
+Before modifying backend behavior:
+- inspect routes;
+- inspect controllers;
+- inspect services/use cases;
+- inspect models/entities;
+- inspect requests/validators;
+- inspect policies/authorization;
+- inspect migrations;
+- inspect tests.
+
+## GENERAL RULES
+
+- Validate input at the appropriate boundary.
+- Authorize actions explicitly.
+- Keep business rules in an appropriate domain/service layer.
+- Avoid fat controllers when the project architecture supports services/use cases.
+- Avoid duplicated business logic.
+- Use transactions for operations that must be atomic.
+- Handle expected failures explicitly.
+- Do not expose sensitive internal data.
+- Do not log secrets, tokens or credentials.
+- Use pagination for potentially large collections.
+- Consider N+1 queries.
+- Consider indexes for frequently filtered/joined columns.
+- Preserve API contracts unless the change explicitly requires a breaking change.
+
+## DATABASE CHANGES
+
+Before changing schema:
+- inspect existing migrations;
+- inspect model relationships;
+- inspect queries;
+- inspect API consumers;
+- consider existing data;
+- consider rollback/deployment order.
+
+Never casually modify an existing migration that may already have been applied. Prefer a new migration when appropriate.

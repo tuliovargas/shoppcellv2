@@ -1,0 +1,45 @@
+---
+description: Architecture and system design rules
+globs: ["docs/SDD.md", "docs/architecture/**/*.md"]
+alwaysApply: false
+---
+
+# ARCHITECTURE STANDARD
+
+The SDD describes how the system is structured.
+
+Before making architectural changes:
+1. Inspect the current architecture.
+2. Identify affected boundaries.
+3. Identify dependencies.
+4. Explain trade-offs.
+5. Prefer the simplest architecture that satisfies requirements.
+
+The SDD may describe:
+- application layers;
+- modules;
+- components;
+- data flows;
+- APIs;
+- authentication;
+- authorization;
+- integrations;
+- persistence;
+- queues;
+- caching;
+- storage;
+- observability;
+- deployment boundaries.
+
+## ARCHITECTURAL PRINCIPLES
+
+- Keep business logic out of presentation when the project architecture separates concerns.
+- Keep domain/business rules centralized.
+- Avoid circular dependencies.
+- Avoid unnecessary abstractions.
+- Avoid premature microservices.
+- Prefer clear module boundaries.
+- Preserve backward compatibility when required.
+- Treat security boundaries explicitly.
+
+Never introduce a new architectural pattern solely because it is fashionable.

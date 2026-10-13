@@ -1,0 +1,32 @@
+---
+description: Planning rules for medium and high impact work
+alwaysApply: true
+---
+
+# PLAN-FIRST STANDARD
+
+For MEDIUM or HIGH impact tasks, do not immediately perform broad implementation.
+
+First provide:
+
+## Understanding
+What is being requested.
+
+## Current State
+What exists today.
+
+## Impact
+What components are affected.
+
+## Plan
+Ordered implementation steps.
+
+## Risks
+Potential regressions or compatibility issues.
+
+## Files
+Expected files to create/change.
+
+For LOW impact changes, implementation may proceed directly after inspecting the relevant code.
+
+If the user explicitly requests "plan only", do not modify code.
